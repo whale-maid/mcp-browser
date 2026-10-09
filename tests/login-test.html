@@ -1,0 +1,39 @@
+<!doctype html>
+<!--
+  autologin 自测靶页（fixture，不联网）。
+  用途：给 mcp-browser 的 autologin 工具做端到端验证——表单结构与真实登录页同形
+  （账号框 / 密码框 / 提交按钮 / 结果区），提交后用脚本把结果写进 #result 与 document.title，
+  便于 autologin 返回的 text/title 里直接读到判定。
+  配合：`vault.mjs set _selftest --url file:///.../login-test.html --user demo --pass demo123` 之类
+  的临时记录（密码为假值，测完即删）。选择器与 fixture 保持稳定，改动时同步 docs/architecture.md。
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>登录（自测靶页）</title>
+</head>
+<body>
+  <h1>自测用登录页</h1>
+  <form id="login-form" onsubmit="return false">
+    <label>账号 <input id="username" name="username" type="text" placeholder="账号" autocomplete="off" /></label>
+    <label>密码 <input id="password" name="password" type="password" placeholder="密码" autocomplete="off" /></label>
+    <button id="submit-btn" type="submit">登 录</button>
+  </form>
+  <p id="result" data-state="idle">等待提交…</p>
+
+  <script>
+    document.getElementById('submit-btn').addEventListener('click', function () {
+      var user = document.getElementById('username').value
+      var pass = document.getElementById('password').value
+      var out = document.getElementById('result')
+      // 只回显「有没有填到」，不回显密码本身——与真实站点一致的判定口径。
+      var ok = user.length > 0 && pass.length > 0
+      out.textContent = ok
+        ? '登录成功：欢迎 ' + user + '（密码已收到 ' + pass.length + ' 位，不回显）'
+        : '登录失败：账号或密码为空'
+      out.setAttribute('data-state', ok ? 'ok' : 'fail')
+      document.title = ok ? '已登录（自测靶页）' : '登录失败（自测靶页）'
+    })
+  </script>
+</body>
+</html>
